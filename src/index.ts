@@ -1,12 +1,14 @@
+require('dotenv').config();
+
+
 import express, { Application } from "express";
 import { ApolloServer } from "apollo-server-express";
-import { resolvers, typeDefs } from "./graphql";
+import {  typeDefs,resolvers } from "./graphql";
 import { connectDB } from "./database";
 
 
-const port = 9000;
 
-const mount = async (app: Application) => {
+const mount = async (app: Application)=> {
 
     const db = await connectDB();
     const server = new ApolloServer({
@@ -19,9 +21,9 @@ const mount = async (app: Application) => {
 
     server.applyMiddleware({ app, path: "/api" });
 
-    app.listen(port);
+    app.listen(process.env.PORT);
 
-    console.log(`[app]:http://localhost:${port}`);
+    console.log(`[app]:http://localhost:${process.env.PORT}`);
 
     const listings = await db.listings.find({}).toArray();
 

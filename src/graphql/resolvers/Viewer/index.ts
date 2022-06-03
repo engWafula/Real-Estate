@@ -72,6 +72,7 @@ const logInViaGoogle = async (
         });
     
         viewer = await db.users.findOne({ _id: insertResult.insertedId });
+  
       }
 
     
@@ -93,14 +94,27 @@ export const viewerResolvers: IResolvers = {
         }
     },
     Mutation:{
-        logIn:async(_root:undefined,{input}:LogInArgs,{db}:{db:Database})=>{
+        logIn:async(_root:undefined,{input}:LogInArgs,{db}:{db:Database}): Promise<Viewer>=>{
             try {
                 const code = input ? input.code : null;
                 const token = crypto.randomBytes(16).toString("hex");
 
-        const viewer:User|null= code
+        const viewer:User | null= code
         ? await logInViaGoogle(code, token, db)
         : null;
+
+        if(!viewer){
+            return {didRequest:true}
+        }
+
+
+        return {
+            _id:viewer._id,
+            token:viewer.token,
+            avatar:viewer.avatar,
+            walletId:viewer.walletId,
+            didRequest:true
+        }
 
             } catch (error) {
                 throw new Error(`Failed to log in: ${error}`);
@@ -115,11 +129,11 @@ export const viewerResolvers: IResolvers = {
         }
     },
     Viewer:{
-    id:(viewer:Viewer)=>{
+    id:(viewer:Viewer):string|undefined=>{
         return  viewer._id;
     },
 
-    hasWallet:(viewer:Viewer)=>{
+    hasWallet:(viewer:Viewer):boolean|undefined=>{
         return viewer.walletId ? true : undefined;
     }
     }

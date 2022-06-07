@@ -5,16 +5,20 @@ import express, { Application } from "express";
 import { ApolloServer } from "apollo-server-express";
 import {  typeDefs,resolvers } from "./graphql";
 import { connectDB } from "./database";
+import cookieParser from "cookie-parser"
 
 
 
 const mount = async (app: Application)=> {
 
     const db = await connectDB();
+
+    app.use(cookieParser(process.env.SECRET));
+
     const server = new ApolloServer({
       typeDefs,
       resolvers,
-      context: () => ({ db }),
+      context: ({res,req}) => ({ db ,res,req}),
     }); 
 
     await server.start();

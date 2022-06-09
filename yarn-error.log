@@ -1,5 +1,5 @@
 Arguments: 
-  /home/wafula/.nvm/versions/node/v16.15.0/bin/node /home/wafula/.nvm/versions/node/v16.15.0/bin/yarn add -D @types/ collect.js
+  /home/wafula/.nvm/versions/node/v16.15.0/bin/node /home/wafula/.nvm/versions/node/v16.15.0/bin/yarn add -D @types/stripe
 
 PATH: 
   /home/wafula/.nvm/versions/node/v16.15.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin
@@ -14,17 +14,7 @@ Platform:
   linux x64
 
 Trace: 
-  Error: https://registry.yarnpkg.com/@types%2f: Request "https://registry.yarnpkg.com/@types%2f" returned a 405
-      at Request.params.callback [as _callback] (/home/wafula/.nvm/versions/node/v16.15.0/lib/node_modules/yarn/lib/cli.js:66147:18)
-      at Request.self.callback (/home/wafula/.nvm/versions/node/v16.15.0/lib/node_modules/yarn/lib/cli.js:140883:22)
-      at Request.emit (node:events:527:28)
-      at Request.<anonymous> (/home/wafula/.nvm/versions/node/v16.15.0/lib/node_modules/yarn/lib/cli.js:141855:10)
-      at Request.emit (node:events:527:28)
-      at IncomingMessage.<anonymous> (/home/wafula/.nvm/versions/node/v16.15.0/lib/node_modules/yarn/lib/cli.js:141777:12)
-      at Object.onceWrapper (node:events:641:28)
-      at IncomingMessage.emit (node:events:539:35)
-      at endReadableNT (node:internal/streams/readable:1345:12)
-      at processTicksAndRejections (node:internal/process/task_queues:83:21)
+  Error: EEXIST: file already exists, symlink '../../../../js-yaml/bin/js-yaml.js' -> '/home/wafula/Downloads/Desktop/React/Tiny_House/server/node_modules/@eslint/eslintrc/node_modules/.bin/js-yaml'
 
 npm manifest: 
   {

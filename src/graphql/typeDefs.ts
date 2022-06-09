@@ -59,6 +59,10 @@ type Booking{
     listings(limit: Int!, page: Int!): Listings!
   }
 
+  input ConnectStripeInput {
+    code: String!
+  }
+
   type Viewer {
     id: ID
     token: String
@@ -81,5 +85,7 @@ type Booking{
   type Mutation {
     logIn(input: LogInInput): Viewer!
     logOut: Viewer!
+    connectStripe(input: ConnectStripeInput!): Viewer!
+    disconnectStripe:Viewer!
   }
 `;

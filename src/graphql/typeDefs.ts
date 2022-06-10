@@ -63,6 +63,20 @@ type Booking{
     code: String!
   }
 
+  input hostListingInput{
+  title:String!
+  description:String!
+  image:String!
+  type:ListingType!
+  address:String!
+  price:Int!
+  numOfGuests:Int!
+  phone:String!
+  city:String!
+  country:String!
+  admin:String!
+  }
+
   type Viewer {
     id: ID
     token: String
@@ -87,5 +101,6 @@ type Booking{
     logOut: Viewer!
     connectStripe(input: ConnectStripeInput!): Viewer!
     disconnectStripe:Viewer!
+    hostListing:(input:hostListingInput!):Listing!
   }
 `;

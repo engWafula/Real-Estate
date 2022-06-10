@@ -73,3 +73,4 @@ export interface Database {
   listings: Collection<Listing>;
   users: Collection<User>;
 }
+

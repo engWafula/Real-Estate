@@ -31,3 +31,21 @@ export interface ListingBookingsArgs {
     total: number;
     result: Listing[];
   }
+
+  export interface HostListingInput{
+    title:string;
+    description:string;
+    image:string;
+    type:ListingType;
+    address:string;
+    city:string;
+    price:number;
+    numOfGuests:number;
+    phone:number
+    country:string;
+    admin:string;
+  }
+
+  export interface HostListingArgs {
+  input:HostListingInput;
+  }

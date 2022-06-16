@@ -8,13 +8,80 @@ import {
   ListingsData,
   ListingsFilter,
   ListingsQuery,
+  HostListingArgs,
+  HostListingInput,
 } from "./types";
 import { ObjectId } from "mongodb";
 import { authorize } from "../../../lib/utils";
 import { Request } from "express";
 import { Google } from "../../../lib/api";
 
+const verifyHostListingInput = (input: HostListingInput): void => {
+  const { title, description, type, price } = input;
+  if (title.length > 100) {
+    throw new Error("listing title must be under 100 characters.");
+  }
+
+  if (description.length > 5000) {
+    throw new Error("listing description must be under 5000 characters.");
+  }
+
+  if (type !== ListingType.Apartment && type !== ListingType.Rental && type !== ListingType.Hotel && type !== ListingType.Hostel) {
+    throw new Error("Listing type must be either apartment or house.");
+  }
+
+  if (price < 0) {
+    throw new Error("Price must be greater than 0.");
+  }
+};
+
 export const ListingResolver: IResolvers = {
+  Mutation: {
+    hostListing: async (
+      _root: undefined,
+      { input }: HostListingArgs,
+      { db, req }: { db: Database; req: Request }
+    ):Promise<Listing | null> => {
+      verifyHostListingInput(input);
+
+      const viewer = await authorize(db, req);
+      if (!viewer) {
+        throw new Error("viewer can't be found.");
+      }
+
+      const { country, admin, city } = await Google.geocode(input.address);
+      if (!country || !admin || !city) {
+        throw new Error("invalid address input...");
+    }
+
+    const insertResult = await db.listings.insertOne({
+      _id: new ObjectId(),
+      ...input,
+      bookings: [],
+      bookingsIndex: {},
+      country,
+      admin,
+      city,
+      host: viewer._id
+    });
+
+
+    
+    const insertedListing:Listing | null = await db.listings.findOne({ _id: insertResult.insertedId });
+
+    await db.users.updateOne(
+      { _id: viewer._id },
+      {
+        $push: {
+          listings: insertedListing?._id
+        }
+      }
+    );
+
+    return insertedListing;
+
+    }
+  },
   Query: {
     listing: async (
       _root: undefined,
@@ -40,12 +107,11 @@ export const ListingResolver: IResolvers = {
     },
     listings: async (
       _root: undefined,
-      {location, filter, limit, page }: ListingsArgs,
+      { location, filter, limit, page }: ListingsArgs,
       { db }: { db: Database }
     ): Promise<ListingsData> => {
       try {
-
-        const query:ListingsQuery= {}
+        const query: ListingsQuery = {};
 
         const data: ListingsData = {
           region: null,
@@ -53,15 +119,15 @@ export const ListingResolver: IResolvers = {
           result: [],
         };
 
-        if(location){
-          const {country, city, admin}= await Google.geocode(location);
-          if(city) query.city= city;
+        if (location) {
+          const { country, city, admin } = await Google.geocode(location);
+          if (city) query.city = city;
 
-          if(admin) query.admin= admin;
+          if (admin) query.admin = admin;
 
-          if(country){
-            query.country= country;
-          } else{
+          if (country) {
+            query.country = country;
+          } else {
             throw new Error("No country found");
           }
 

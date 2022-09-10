@@ -14,10 +14,8 @@ export const typeDefs = gql`
     result: [Booking!]!
   }
   enum ListingType {
-    APARTMENT
-    RENTAL
-    HOSTEL
-    HOTEL
+    COMMERCIAL,
+    RESIDENTIAL
   }
 
   enum ListingsFilter {

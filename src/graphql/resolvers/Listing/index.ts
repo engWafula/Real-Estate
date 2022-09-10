@@ -26,7 +26,7 @@ const verifyHostListingInput = (input: HostListingInput): void => {
     throw new Error("listing description must be under 5000 characters.");
   }
 
-  if (type !== ListingType.Apartment && type !== ListingType.Rental && type !== ListingType.Hotel && type !== ListingType.Hostel) {
+  if (type !== ListingType.Commercial && type !== ListingType.Residential) {
     throw new Error("Listing type must be either apartment or house.");
   }
 

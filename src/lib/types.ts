@@ -11,10 +11,8 @@ export interface Viewer {
 
 
 export enum ListingType{
-  Apartment="APARTMENT",
-  Rental="RENTAL",
-  Hostel="HOSTEL",
-  Hotel="HOTEL"
+  Commercial="COMMERCIAL",
+  Residential = "RESIDENTIAL"
 }
 
 export interface BookingsIndexMonth {

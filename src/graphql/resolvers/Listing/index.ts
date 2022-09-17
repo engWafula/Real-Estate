@@ -14,7 +14,7 @@ import {
 import { ObjectId } from "mongodb";
 import { authorize } from "../../../lib/utils";
 import { Request } from "express";
-import { Google } from "../../../lib/api";
+import { Google,Cloudinary } from "../../../lib/api";
 
 const verifyHostListingInput = (input: HostListingInput): void => {
   const { title, description, type, price } = input;
@@ -53,6 +53,8 @@ export const ListingResolver: IResolvers = {
       if (!country || !admin || !city) {
         throw new Error("invalid address input...");
     }
+
+    const imageUrl = await Cloudinary.upload(input.image);
 
     const insertResult = await db.listings.insertOne({
       _id: new ObjectId(),

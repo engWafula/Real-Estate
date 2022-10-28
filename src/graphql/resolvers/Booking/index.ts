@@ -1,13 +1,13 @@
 import { IResolvers } from "@graphql-tools/utils";
 import {Booking,Database,Listing} from "../../../lib/types"
 
-export const BookingResolver:IResolvers{
+export const BookingResolver:IResolvers = {
     Booking:{
-        id:(booking:Booking):string=>{
+        id:(booking:Booking):String=>{
             return booking. _id.toString()
         },
         listing:(booking:Booking,_args:{},{db}:{db:Database}):Promise<Listing | null>=>{
-            retrun db.listings.findOne({_id:booking.listing})
+            return db.listings.findOne({_id:booking.listing})
         }
     }
 }

@@ -64,7 +64,8 @@ export const ListingResolver: IResolvers = {
       country,
       admin,
       city,
-      host: viewer._id
+      host: viewer._id,
+      image: imageUrl,
     });
 
 

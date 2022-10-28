@@ -1,16 +1,22 @@
-import { Booking, Database, Listing, BookingsIndex } from "../../../lib/types"
-import { IResolvers } from "@graphql-tools/utils";
-import { createBookingArgs } from "./types";
-import { Request } from "express";
-import { ObjectId } from "mongodb";
-import { authorize } from "../../../lib/utils";
-import { Stripe } from "../../../lib/api";
-
-
-const resolveBookingsIndex = (bookingsIndex: BookingsIndex, checkInDate: string, checkOutDate: string): BookingsIndex => {
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.BookingResolver = void 0;
+const mongodb_1 = require("mongodb");
+const utils_1 = require("../../../lib/utils");
+const api_1 = require("../../../lib/api");
+const resolveBookingsIndex = (bookingsIndex, checkInDate, checkOutDate) => {
     let dateCursor = new Date(checkInDate);
     const checkOut = new Date(checkOutDate);
-    const newBookingsIndex: BookingsIndex = { ...bookingsIndex };
+    const newBookingsIndex = Object.assign({}, bookingsIndex);
     while (dateCursor <= checkOut) {
         const year = dateCursor.getUTCFullYear();
         const month = dateCursor.getUTCMonth();
@@ -30,27 +36,21 @@ const resolveBookingsIndex = (bookingsIndex: BookingsIndex, checkInDate: string,
         dateCursor = new Date(dateCursor.getTime() + 86400000);
     }
     return newBookingsIndex;
-}
-
-export const BookingResolver: IResolvers = {
+};
+exports.BookingResolver = {
     Mutation: {
-        createBooking: async (
-            _root: undefined,
-            { input }: createBookingArgs,
-            { db, req }: { db: Database; req: Request }
-        ): Promise<Booking | null> => {
+        createBooking: (_root, { input }, { db, req }) => __awaiter(void 0, void 0, void 0, function* () {
             try {
                 const { id, source, checkIn, checkOut } = input;
                 //verfiy a logged in user is making the 
-                const viewer = await authorize(db, req);
+                const viewer = yield (0, utils_1.authorize)(db, req);
                 if (!viewer) {
                     throw new Error("viewer can't be found.");
                 }
                 //find the listing the user is trying to book
-                const listing = await db.listings.findOne({
-                    _id: new ObjectId(id)
+                const listing = yield db.listings.findOne({
+                    _id: new mongodb_1.ObjectId(id)
                 });
-
                 if (!listing) {
                     throw new Error("listing can't be found.");
                 }
@@ -65,72 +65,64 @@ export const BookingResolver: IResolvers = {
                     throw new Error("check out date can't be before check in date.");
                 }
                 //create a new booking index  the listing being booked
-                const bookingsIndex = resolveBookingsIndex(
-                    listing.bookingsIndex,
-                    checkIn,
-                    checkOut,
-                );
+                const bookingsIndex = resolveBookingsIndex(listing.bookingsIndex, checkIn, checkOut);
                 //get total price to charge
                 const totalPrice = listing.price * ((checkOutDate.getTime() - checkInDate.getTime()) / 86400000 + 1);
                 //get user doc of the host  of the listing 
-                const host = await db.users.findOne({
+                const host = yield db.users.findOne({
                     _id: listing.host
                 });
-
                 if (!host || !host.walletId) {
                     throw new Error("the host either can't be found or is not connected with Stripe.");
                 }
                 // create stripe charge on behalf of the host 
-                await Stripe.charge(source, totalPrice, host.walletId);
-
+                yield api_1.Stripe.charge(source, totalPrice, host.walletId);
                 //insert a new booking in our booking collection 
-                const insertResult = await db.bookings.insertOne({
-                    _id: new ObjectId(),
+                const insertResult = yield db.bookings.insertOne({
+                    _id: new mongodb_1.ObjectId(),
                     listing: listing._id,
                     tenant: viewer._id,
                     checkIn,
                     checkOut
-                })
-
-                const insertedBooking: Booking | null = await db.bookings.findOne({ _id: insertResult.insertedId });
-
+                });
+                const insertedBooking = yield db.bookings.findOne({ _id: insertResult.insertedId });
                 //update the user doc of the host to incerement their income
-                await db.users.updateOne({
+                yield db.users.updateOne({
                     _id: host._id
                 }, {
                     $inc: { income: totalPrice }
-                })
+                });
                 // update the booking field of the tenant
-                await db.users.updateOne({
+                yield db.users.updateOne({
                     _id: viewer._id
                 }, {
-                    $push: { bookings: insertedBooking?._id }
-                })
+                    $push: { bookings: insertedBooking === null || insertedBooking === void 0 ? void 0 : insertedBooking._id }
+                });
                 // update the booking field of the listing document 
-                await db.listings.updateOne({
+                yield db.listings.updateOne({
                     _id: listing._id
                 }, {
                     $set: { bookingsIndex },
-                    $push: { bookings: insertedBooking?._id }
+                    $push: { bookings: insertedBooking === null || insertedBooking === void 0 ? void 0 : insertedBooking._id }
                 }),
-                
-       return insertedBooking;
-
-
-            } catch (error) {
+                ;
+                // return the newly created booking
+                return insertedBooking;
+            }
+            catch (error) {
                 throw new Error(`Failed to create a booking: ${error}`);
             }
-        }
+        })
     },
     Booking: {
-        id: (booking: Booking): String => {
-            return booking._id.toString()
+        id: (booking) => {
+            return booking._id.toString();
         },
-        listing: (booking: Booking, _args: {}, { db }: { db: Database }): Promise<Listing | null> => {
-            return db.listings.findOne({ _id: booking.listing })
+        listing: (booking, _args, { db }) => {
+            return db.listings.findOne({ _id: booking.listing });
         },
-        tenant: (booking: Booking, _args: {}, { db }: { db: Database }) => {
-            return db.users.findOne({ _id: booking.tenant })
+        tenant: (booking, _args, { db }) => {
+            return db.users.findOne({ _id: booking.tenant });
         }
     }
-}
+};

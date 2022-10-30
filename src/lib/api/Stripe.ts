@@ -21,7 +21,7 @@ export const Stripe={
             source,
             application_fee_amount: Math.round(amount * 0.05)
           },{
-           stripeAccount
+           stripeAccount:stripeAccount
           });
        if(response.status!=="succeeded"){
             throw new Error("failed to create charge with stripe")

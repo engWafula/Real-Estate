@@ -105,11 +105,11 @@ export const typeDefs = gql`
   }
 
   type Mutation {
-    createBooking(input:createBookingInput!):Booking!
     logIn(input: LogInInput): Viewer!
     logOut: Viewer!
     connectStripe(input: ConnectStripeInput!): Viewer!
     disconnectStripe: Viewer!
     hostListing(input: HostListingInput!): Listing!
+    createBooking(input:createBookingInput!): Booking!
   }
 `;

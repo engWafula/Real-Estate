@@ -1,6 +1,5 @@
 import { IResolvers } from "@graphql-tools/utils";
 import { Request } from "express";
-import  count from "collect.js";
 import { authorize } from "../../../lib/utils";
 import { Database, User, Booking } from "../../../lib/types";
 import {
@@ -10,7 +9,6 @@ import {
   UserListingsArgs,
   UserListingsData
 } from "./types";
-import { WithId } from "mongodb";
 
 export const userResolver: IResolvers = {
   Query: {

@@ -49,7 +49,7 @@ const logInViaGoogle = async (
 
   // Name/Photo/Email Lists
   const userNamesList = user.names && user.names.length ? user.names : null;
-  const userPhoneList= user.phoneNumbers && user.phoneNumbers ? user.phoneNumbers : null;
+  
   const userLocationList= user.locations && user.locations ? user.locations: null;
   const userPhotosList = user.photos && user.photos.length ? user.photos : null;
   const userEmailsList =
@@ -59,7 +59,6 @@ const logInViaGoogle = async (
 
   // User Display Name
   const userName = userNamesList ? userNamesList[0].displayName : null;
-
   // User Id
   const userId =
     userNamesList &&

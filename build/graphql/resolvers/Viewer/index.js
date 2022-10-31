@@ -37,7 +37,6 @@ const logInViaGoogle = (code, token, db, res) => __awaiter(void 0, void 0, void 
     }
     // Name/Photo/Email Lists
     const userNamesList = user.names && user.names.length ? user.names : null;
-    const userPhoneList = user.phoneNumbers && user.phoneNumbers ? user.phoneNumbers : null;
     const userLocationList = user.locations && user.locations ? user.locations : null;
     const userPhotosList = user.photos && user.photos.length ? user.photos : null;
     const userEmailsList = user.emailAddresses && user.emailAddresses.length

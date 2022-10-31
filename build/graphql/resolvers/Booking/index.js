@@ -42,14 +42,14 @@ exports.BookingResolver = {
         createBooking: (_root, { input }, { db, req }) => __awaiter(void 0, void 0, void 0, function* () {
             try {
                 const { id, source, checkIn, checkOut } = input;
-                //verfiy a logged in user is making the 
+                //verfiy a logged in user is making the
                 const viewer = yield (0, utils_1.authorize)(db, req);
                 if (!viewer) {
                     throw new Error("viewer can't be found.");
                 }
                 //find the listing the user is trying to book
                 const listing = yield db.listings.findOne({
-                    _id: new mongodb_1.ObjectId(id)
+                    _id: new mongodb_1.ObjectId(id),
                 });
                 if (!listing) {
                     throw new Error("listing can't be found.");
@@ -67,52 +67,53 @@ exports.BookingResolver = {
                 //create a new booking index  the listing being booked
                 const bookingsIndex = resolveBookingsIndex(listing.bookingsIndex, checkIn, checkOut);
                 //get total price to charge
-                const totalPrice = listing.price * ((checkOutDate.getTime() - checkInDate.getTime()) / 86400000 + 1);
-                //get user doc of the host  of the listing 
+                const totalPrice = listing.price *
+                    ((checkOutDate.getTime() - checkInDate.getTime()) / 86400000 + 1);
+                //get user doc of the host  of the listing
                 const host = yield db.users.findOne({
-                    _id: listing.host
+                    _id: listing.host,
                 });
                 if (!host || !host.walletId) {
                     throw new Error("the host either can't be found or is not connected with Stripe.");
                 }
-                // create stripe charge on behalf of the host 
+                // create stripe charge on behalf of the host
                 yield api_1.Stripe.charge(source, totalPrice, host.walletId);
-                //insert a new booking in our booking collection 
+                //insert a new booking in our booking collection
                 const insertResult = yield db.bookings.insertOne({
                     _id: new mongodb_1.ObjectId(),
                     listing: listing._id,
                     tenant: viewer._id,
                     checkIn,
-                    checkOut
+                    checkOut,
                 });
-                const insertedBooking = yield db.bookings.findOne({ _id: insertResult.insertedId });
-                //update the user doc of the host to incerement their income
-                yield db.users.updateOne({
-                    _id: host._id
-                }, {
-                    $inc: { income: totalPrice }
+                const insertedBooking = yield db.bookings.findOne({
+                    _id: insertResult.insertedId,
                 });
                 // update the booking field of the tenant
                 yield db.users.updateOne({
-                    _id: viewer._id
+                    _id: viewer._id,
                 }, {
-                    $push: { bookings: insertedBooking === null || insertedBooking === void 0 ? void 0 : insertedBooking._id }
+                    $push: { bookings: insertedBooking === null || insertedBooking === void 0 ? void 0 : insertedBooking._id },
                 });
-                // update the booking field of the listing document 
+                // update the booking field of the listing document
                 yield db.listings.updateOne({
-                    _id: listing._id
+                    _id: listing._id,
                 }, {
                     $set: { bookingsIndex },
-                    $push: { bookings: insertedBooking === null || insertedBooking === void 0 ? void 0 : insertedBooking._id }
+                    $push: { bookings: insertedBooking === null || insertedBooking === void 0 ? void 0 : insertedBooking._id },
                 }),
-                ;
-                // return the newly created booking
+                    //update the user doc of the host to incerement their income
+                    yield db.users.updateOne({
+                        _id: host._id,
+                    }, {
+                        $inc: { income: totalPrice },
+                    });
                 return insertedBooking;
             }
             catch (error) {
                 throw new Error(`Failed to create a booking: ${error}`);
             }
-        })
+        }),
     },
     Booking: {
         id: (booking) => {
@@ -123,6 +124,6 @@ exports.BookingResolver = {
         },
         tenant: (booking, _args, { db }) => {
             return db.users.findOne({ _id: booking.tenant });
-        }
-    }
+        },
+    },
 };

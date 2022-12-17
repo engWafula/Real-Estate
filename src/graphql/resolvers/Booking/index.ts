@@ -104,36 +104,38 @@ export const BookingResolver: IResolvers = {
           _id: insertResult.insertedId,
         });
 
-        // update the booking field of the tenant
-        await db.users.updateOne(
-          {
-            _id: viewer._id,
-          },
-          {
-            $push: { bookings: insertedBooking?._id },
-          }
-        );
-        // update the booking field of the listing document
-        await db.listings.updateOne(
-          {
-            _id: listing._id,
-          },
-          {
-            $set: { bookingsIndex },
-            $push: { bookings: insertedBooking?._id },
-          }
-        ),
-          //update the user doc of the host to incerement their income
-          await db.users.updateOne(
-            {
-              _id: host._id,
-            },
-            {
-              $inc: { income: totalPrice },
-            }
-          );
+  // update the booking field of the tenant
+  await db.users.updateOne(
+    {
+      _id: viewer._id,
+    },
+    {
+      $push: { bookings: insertedBooking?._id },
+    }
+  );
+  // update the booking field of the listing document
+  await db.listings.updateOne(
+    {
+      _id: listing._id,
+    },
+    {
+      $set: { bookingsIndex },
+      $push: { bookings: insertedBooking?._id },
+    }
+  ),
+    //update the user doc of the host to incerement their income
+    await db.users.updateOne(
+      {
+        _id: host._id,
+      },
+      {
+        $inc: { income: totalPrice },
+      }
+    );
 
         return insertedBooking;
+
+
       } catch (error) {
         throw new Error(`Failed to create a booking: ${error}`);
       }
